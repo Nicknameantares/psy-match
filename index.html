@@ -1,0 +1,541 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Странные вопросы</title>
+<meta name="description" content="Странные вопросы с двумя вариантами. Узнай свой портрет и насколько ты похож на остальных.">
+<meta property="og:title" content="Утка или лошадь? Странные вопросы">
+<meta property="og:description" content="Два варианта, правильных ответов нет. Сколько осилишь?">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🦆%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Nunito:wght@400;600;800&display=swap">
+<style>
+/* Одна колонка-карточка по центру: шапка со счётчиком, крупный эмодзи, два пухлых варианта */
+:root{
+  --bg:#EAF2FB; --card:#FFFFFF; --ink:#1E2A3A; --muted:#5F6E84; --line:#D3DFEE;
+  --a:#FF7A6B; --a-soft:#FFE3DE; --a-ink:#8A2A1F;
+  --b:#4F8DF7; --b-soft:#DCE8FF; --b-ink:#1D4FB0;
+  --lemon:#FFD95A; --lemon-ink:#5A4300;
+  --display:"Unbounded", "Arial Rounded MT Bold", system-ui, sans-serif;
+  --body:"Nunito", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#121925; --card:#1B2433; --ink:#EEF3FA; --muted:#9DABC0; --line:#2B3749;
+  --a:#FF8C7E; --a-soft:#45282A; --a-ink:#FFC9C1;
+  --b:#6EA1FF; --b-soft:#1F3150; --b-ink:#C2D7FF;
+  --lemon:#FFD95A; --lemon-ink:#3A2C00; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#121925; --card:#1B2433; --ink:#EEF3FA; --muted:#9DABC0; --line:#2B3749;
+  --a:#FF8C7E; --a-soft:#45282A; --a-ink:#FFC9C1;
+  --b:#6EA1FF; --b-soft:#1F3150; --b-ink:#C2D7FF;
+  --lemon:#FFD95A; --lemon-ink:#3A2C00; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+[hidden]{display:none!important}
+body{margin:0;-webkit-text-size-adjust:100%;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 32px}
+.wrap{max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.logo{font-family:var(--display);font-weight:700;font-size:15px;letter-spacing:.01em;display:flex;align-items:center;gap:8px;background:none;border:0;color:var(--ink);cursor:pointer;padding:4px 0}
+.logo i{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--lemon);color:var(--lemon-ink);font-style:normal;font-size:15px}
+.hud{display:flex;gap:8px;align-items:center}
+.pill{font-weight:800;font-size:14px;border-radius:999px;padding:6px 12px;background:var(--card);border:1.5px solid var(--line);color:var(--ink);font-variant-numeric:tabular-nums;font-family:var(--body)}
+button.pill{cursor:pointer}
+button.pill:disabled{cursor:default;color:var(--muted)}
+.card{background:var(--card);border-radius:28px;padding:28px 22px;box-shadow:0 10px 30px -18px rgba(30,42,58,.35);display:flex;flex-direction:column;gap:18px;align-items:stretch}
+h1{font-family:var(--display);font-weight:700;font-size:clamp(30px,8vw,42px);line-height:1.05;margin:0;text-wrap:balance}
+h2{font-family:var(--display);font-weight:700;font-size:24px;line-height:1.15;margin:0;text-wrap:balance}
+.lead{color:var(--muted);margin:0;font-size:17px}
+.big{font-size:72px;line-height:1;text-align:center;user-select:none}
+.bounce{animation:pop .45s cubic-bezier(.3,1.6,.5,1)}
+@keyframes pop{from{transform:scale(.6) rotate(-8deg);opacity:.3}to{transform:none;opacity:1}}
+.eyebrow{font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);text-align:center}
+.choices{display:flex;flex-direction:column;gap:10px}
+.or{text-align:center;font-family:var(--display);font-size:13px;color:var(--muted)}
+.opt{position:relative;overflow:hidden;border:0;border-radius:22px;padding:20px 18px;font:800 18px/1.3 var(--body);cursor:pointer;text-align:center;transition:transform .12s}
+.opt:hover{transform:translateY(-2px)}
+.opt:active{transform:scale(.98)}
+.opt:focus-visible,.go:focus-visible,.pill:focus-visible,.logo:focus-visible,.ghost:focus-visible{outline:3px solid var(--lemon);outline-offset:3px}
+.opt.a{background:var(--a-soft);color:var(--a-ink)}
+.opt.b{background:var(--b-soft);color:var(--b-ink)}
+.opt .fill{position:absolute;inset:0 auto 0 0;width:0;opacity:.28;transition:width .6s ease}
+.opt.a .fill{background:var(--a)} .opt.b .fill{background:var(--b)}
+.opt span{position:relative}
+.opt .pct{display:block;font-size:13px;font-weight:600;opacity:0;transition:opacity .3s}
+.answered .opt{cursor:default;transform:none}
+.answered .opt .pct{opacity:1}
+.answered .opt:not(.picked){opacity:.6}
+.opt.picked{box-shadow:0 0 0 3px currentColor inset}
+.hint{text-align:center;color:var(--muted);font-size:13px;min-height:1.2em;margin:0}
+.go{font:700 16px var(--display);border:0;border-radius:999px;padding:16px 26px;background:var(--ink);color:var(--bg);cursor:pointer;align-self:center}
+.ghost{font:700 14px var(--body);border:0;background:none;color:var(--muted);cursor:pointer;text-decoration:underline;text-underline-offset:3px;align-self:center;padding:6px}
+.row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.stat{color:var(--muted);font-size:14px;text-align:center;margin:0}
+.stat b{color:var(--ink);font-variant-numeric:tabular-nums}
+/* портрет */
+.who{display:flex;gap:16px;align-items:center}
+.who .big{font-size:64px}
+.who p{margin:4px 0 0;color:var(--muted)}
+.tag{display:inline-block;background:var(--lemon);color:var(--lemon-ink);font-weight:800;font-size:12px;border-radius:999px;padding:3px 10px;letter-spacing:.04em}
+.axes{display:flex;flex-direction:column;gap:14px}
+.axis .lbl{display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:var(--muted);gap:8px}
+.axis .lbl .on{color:var(--ink)}
+.track{position:relative;height:12px;border-radius:999px;background:linear-gradient(90deg,var(--b-soft),var(--a-soft));margin-top:6px}
+.track .mid{position:absolute;left:50%;top:-3px;bottom:-3px;width:2px;background:var(--line)}
+.track .avg{position:absolute;top:-4px;width:4px;height:20px;border-radius:2px;background:var(--muted);transform:translateX(-50%)}
+.track .me{position:absolute;top:50%;width:22px;height:22px;border-radius:50%;background:var(--ink);border:3px solid var(--card);transform:translate(-50%,-50%);transition:left .6s}
+.legend{display:flex;gap:16px;justify-content:center;font-size:12px;color:var(--muted)}
+.legend span{display:flex;align-items:center;gap:6px}
+.legend .d1{width:12px;height:12px;border-radius:50%;background:var(--ink)}
+.legend .d2{width:4px;height:14px;border-radius:2px;background:var(--muted)}
+.gauge{display:flex;flex-direction:column;align-items:center;gap:4px}
+.gauge svg{width:min(260px,100%);height:auto}
+.gauge .num{font-family:var(--display);font-weight:700;font-size:40px;font-variant-numeric:tabular-nums;line-height:1}
+.gauge .cap{font-weight:800}
+.sec{border-top:1.5px dashed var(--line);padding-top:18px;display:flex;flex-direction:column;gap:14px}
+.sec h3{margin:0;font:800 12px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.rare{background:var(--bg);border-radius:18px;padding:14px 16px;font-size:15px}
+.rare b{font-weight:800}
+.note{font-size:12px;color:var(--muted);text-align:center;margin:0}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+</style>
+<script src="https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js"></script>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <button class="logo" id="home" type="button"><i>?</i>странные вопросы</button>
+    <div class="hud">
+      <span class="pill" id="count" title="Ответов">0 ✓</span>
+      <button class="pill" id="toPortrait" type="button" disabled>Портрет</button>
+    </div>
+  </header>
+
+  <section class="card" id="start">
+    <div class="big bounce">🦆</div>
+    <h1>Утка или лошадь?</h1>
+    <p class="lead">Странные вопросы, два варианта. Правильных ответов нет. Отвечай сколько осилишь, а потом посмотри, кто ты и насколько ты похож на остальных.</p>
+    <button class="go" id="begin" type="button">Поехали</button>
+    <p class="stat" id="startStat">Загружаем ответы других людей…</p>
+  </section>
+
+  <section class="card" id="play" hidden>
+    <div class="eyebrow" id="qnum">Вопрос 1</div>
+    <div class="big" id="qemoji">🦈</div>
+    <div class="choices" id="choices">
+      <button class="opt a" id="optA" type="button"><i class="fill"></i><span id="optAt"></span><span class="pct" id="optAp"></span></button>
+      <div class="or">или</div>
+      <button class="opt b" id="optB" type="button"><i class="fill"></i><span id="optBt"></span><span class="pct" id="optBp"></span></button>
+    </div>
+    <p class="hint" id="hint">Клавиши 1 и 2 тоже работают</p>
+  </section>
+
+  <section class="card" id="done" hidden>
+    <div class="big bounce">🏁</div>
+    <h2>Ты ответил на всё!</h2>
+    <p class="lead">Новые вопросы появляются регулярно. Загляни позже.</p>
+    <button class="go" id="doneToPortrait" type="button">Мой портрет</button>
+  </section>
+
+  <section class="card" id="portrait" hidden>
+    <div class="who">
+      <div class="big" id="pEmoji">🦝</div>
+      <div>
+        <span class="tag">твой портрет</span>
+        <h2 id="pName">Енот-вихрь</h2>
+        <p id="pDesc"></p>
+      </div>
+    </div>
+    <div class="axes" id="axes"></div>
+    <div class="legend"><span><i class="d1"></i>ты</span><span><i class="d2"></i>в среднем у всех</span></div>
+
+    <div class="sec">
+      <h3>Барометр совпадения</h3>
+      <div class="gauge">
+        <svg viewBox="0 0 220 124" aria-hidden="true">
+          <path d="M20 110 A90 90 0 0 1 200 110" fill="none" stroke="var(--line)" stroke-width="18" stroke-linecap="round"/>
+          <path id="gArc" d="M20 110 A90 90 0 0 1 200 110" fill="none" stroke="var(--a)" stroke-width="18" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100"/>
+          <line id="gNeedle" x1="110" y1="110" x2="110" y2="36" stroke="var(--ink)" stroke-width="5" stroke-linecap="round" style="transform-origin:110px 110px;transition:transform .8s cubic-bezier(.3,1.4,.5,1)"/>
+          <circle cx="110" cy="110" r="9" fill="var(--ink)"/>
+        </svg>
+        <div class="num" id="gNum">—</div>
+        <div class="cap" id="gCap"></div>
+        <p class="stat" id="gSub"></p>
+      </div>
+      <div class="rare" id="rare" hidden></div>
+    </div>
+
+    <div class="sec">
+      <h3>Выносливость</h3>
+      <p class="stat" id="stamina"></p>
+    </div>
+
+    <button class="go" id="more" type="button">Ещё вопросы</button>
+    <p class="note" id="saveNote"></p>
+  </section>
+</div>
+
+<script>
+// ось: [ключ, полюс «+» (вариант А), полюс «−» (вариант Б)]
+const AX = {
+  brave:  {p:"Смелость",    n:"Осторожность"},
+  heart:  {p:"Сердце",      n:"Голова"},
+  social: {p:"Компания",    n:"Одиночество"},
+  chaos:  {p:"Хаос",        n:"Порядок"},
+  dream:  {p:"Мечты",       n:"Реальность"}
+};
+const TYPES = {
+  "brave+": ["🦁","Отважный лев","Сначала прыгаешь, потом смотришь, есть ли там вода. Обычно есть."],
+  "brave-": ["🐢","Мудрая черепаха","Знаешь, где запасной выход, и пластырь у тебя всегда с собой."],
+  "heart+": ["🐻","Тёплый медведь","Выбираешь сердцем и переносишь улиток через дорогу."],
+  "heart-": ["🦉","Сова-стратег","Сначала логика, потом всё остальное. Спорить с тобой бесполезно."],
+  "social+":["🐬","Весёлый дельфин","Тебе нужна стая, музыка и кто-то, кому срочно рассказать новость."],
+  "social-":["🐈","Независимый кот","Гуляешь сам по себе и прекрасно себя чувствуешь."],
+  "chaos+": ["🦝","Енот-вихрь","Носки разные, план примерный, жизнь интересная."],
+  "chaos-": ["🐝","Пчела-архитектор","У всего есть своё место. Даже у этого вопроса."],
+  "dream+": ["🦄","Единорог-мечтатель","Наполовину живёшь в сказке. Вторая половина тоже ничего."],
+  "dream-": ["🦫","Бобр-практик","Тебе подавай Wi-Fi, а не облака. И это честно."]
+};
+const PINCH = {"brave+":"смелости","brave-":"осторожности","heart+":"нежности","heart-":"логики","social+":"общительности","social-":"уединения","chaos+":"хаоса","chaos-":"порядка","dream+":"мечтательности","dream-":"реализма"};
+
+// [ось, эмодзи, вариант А (полюс +), вариант Б (полюс −)]
+const BASE = [
+ ["brave","🦈","Поплавать с акулой в клетке","Посмотреть документалку про акул"],
+ ["brave","🎢","Первый вагон на американских горках","Подержать всем рюкзаки"],
+ ["brave","🌋","Пикник на краю вулкана","Пикник на балконе"],
+ ["brave","🍲","Заказать блюдо, название которого не можешь прочесть","Взять то же, что в прошлый раз"],
+ ["brave","🪂","Прыжок с парашютом на день рождения","Плед в подарок"],
+ ["brave","👻","Ночь в доме с привидениями за миллион","Ночь дома бесплатно"],
+ ["brave","🚀","Билет на Марс в один конец","Вечный отпуск на даче"],
+ ["brave","🗣️","Сказать начальнику правду в лицо","Написать её в дневник"],
+ ["brave","🐍","Живая змея вместо шарфа","Шарф с принтом змеи"],
+ ["brave","🦆","Сразиться с одной уткой размером с лошадь","Сразиться со ста лошадьми размером с утку"],
+ ["heart","🐶","Спасти щенка","Спасти ноутбук с дипломом"],
+ ["heart","💌","Признаться в любви письмом","Составить таблицу плюсов и минусов"],
+ ["heart","🎁","Подарок своими руками","Подарок строго из вишлиста"],
+ ["heart","🍕","Отдать последний кусок пиццы другу","Разрезать его ровно пополам по линейке"],
+ ["heart","🌧️","Плакать над грустным фильмом","Искать в нём сюжетные дыры"],
+ ["heart","🧭","Выбрать город для жизни сердцем","Выбрать по таблице зарплат"],
+ ["heart","🐌","Перенести улитку с дороги на траву","Идти дальше, ты опаздываешь"],
+ ["heart","🎻","Музыка, от которой мурашки","Музыка, под которую думается"],
+ ["heart","🧸","Хранить детскую игрушку всю жизнь","Отдать её тому, кто будет играть"],
+ ["heart","🤖","Робот, который понимает чувства","Робот, который никогда не ошибается"],
+ ["social","🎉","Вечеринка на сто человек","Ужин на двоих"],
+ ["social","🏝️","Необитаемый остров с толпой незнакомцев","Необитаемый остров в одиночку"],
+ ["social","📞","Позвонить","Написать сообщение"],
+ ["social","🎤","Караоке на сцене","Караоке в душе"],
+ ["social","🐧","Пингвин в большой стае","Сова на своей ветке"],
+ ["social","🚆","Болтать с попутчиком в поезде","Смотреть в окно в наушниках"],
+ ["social","🏠","Жить с друзьями в общаге навсегда","Жить одному на маяке"],
+ ["social","🎂","Сюрприз-вечеринка в твою честь","Тихий день, все забыли"],
+ ["social","🧩","Собирать пазл всей семьёй","Собирать пазл ночью одному"],
+ ["social","🐝","Работать в шумном улье","Работать как кот: когда хочу и где хочу"],
+ ["chaos","🧦","Всегда разные носки","Всегда парные носки"],
+ ["chaos","🗺️","Путешествие без плана","Путешествие по таблице с расписанием"],
+ ["chaos","📚","Книги на полке по цвету обложки","Книги по алфавиту"],
+ ["chaos","🍳","Готовить без рецепта","Готовить строго по граммам"],
+ ["chaos","🛒","В магазин без списка","Список, разбитый по отделам"],
+ ["chaos","⏰","Будильник на 7:03","Будильник ровно на 7:00"],
+ ["chaos","🖍️","Рисовать прямо на стенах квартиры","Рисовать на бумаге и вешать в рамку"],
+ ["chaos","🎒","Собрать чемодан за 10 минут до выхода","Собрать чемодан за неделю"],
+ ["chaos","🍜","Есть суп вилкой ради интереса","Есть суп ложкой, как положено"],
+ ["chaos","📱","300 непрочитанных уведомлений","Ноль непрочитанных"],
+ ["chaos","🥒","Огурцы со вкусом клубники","Клубника со вкусом клубники"],
+ ["dream","🦄","Найти единорога","Найти миллион"],
+ ["dream","☁️","Жить на облаке","Жить в доме с хорошим Wi-Fi"],
+ ["dream","🧙","Колдовать, но только по вторникам","Всегда находить парковку"],
+ ["dream","🐉","Дракон размером с кошку","Кот размером с кошку"],
+ ["dream","🌙","Поболтать с Луной","Ответ техподдержки за минуту"],
+ ["dream","🎨","Мир в мультяшной рисовке","Мир в 4K"],
+ ["dream","🕰️","Машина времени в прошлое","Гарантированно спокойное будущее"],
+ ["dream","🧜","Жабры","Идеальная память"],
+ ["dream","🌈","Гулять по радуге","Гулять по ровному асфальту"],
+ ["dream","🦉","Понимать язык сов","Понимать налоговый кодекс"]
+];
+
+const PORTRAIT_AT = 7;
+const $ = id => document.getElementById(id);
+const store = {
+  get(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } },
+  set(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+};
+
+const qmap = new Map();
+// у всех один и тот же порядок вопросов: так ответы пересекаются и их можно сравнивать
+const ORDER = BASE.map((r,i) => i);
+{ let seed = 20261021; const rnd = () => (seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648;
+  for(let i=ORDER.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [ORDER[i],ORDER[j]]=[ORDER[j],ORDER[i]]; } }
+ORDER.forEach(i => { const r = BASE[i]; qmap.set("q"+(i+1), {id:"q"+(i+1), ax:r[0], e:r[1], a:r[2], b:r[3]}); });
+
+let mine = store.get("sq-answers") || {};
+let others = [];             // [{a:{qid:0|1}, n}]
+// анонимный id участника живёт в браузере
+let uid = store.get("sq-uid");
+if(typeof uid !== "string" || !/^[a-z0-9]{10,24}$/.test(uid)){ uid = Math.random().toString(36).slice(2,12) + Date.now().toString(36); store.set("sq-uid", uid); }
+let canWrite = false, dbReady = false;
+let deck = [];
+let current = null, locked = false;
+
+function refreshDeck(){
+  const inDeck = new Set(deck);
+  const fresh = [...qmap.keys()].filter(id => !(id in mine) && !inDeck.has(id) && id !== current?.id);
+  deck = deck.filter(id => !(id in mine)).concat(fresh);
+}
+function answeredCount(){ return Object.keys(mine).filter(id => qmap.has(id)).length; }
+
+function show(id){
+  for(const s of ["start","play","done","portrait"]) $(s).hidden = s !== id;
+  window.scrollTo({top:0});
+}
+function updateHud(){
+  const n = answeredCount();
+  $("count").textContent = n + " ✓";
+  const left = PORTRAIT_AT - n;
+  $("toPortrait").disabled = left > 0;
+  $("toPortrait").textContent = left > 0 ? "Портрет через " + left : "Портрет";
+}
+
+function next(){
+  refreshDeck();
+  if(!deck.length){ current = null; show("done"); return; }
+  current = qmap.get(deck.shift());
+  locked = false;
+  $("choices").classList.remove("answered");
+  for(const k of ["A","B"]){
+    const o = $("opt"+k); o.classList.remove("picked"); o.querySelector(".fill").style.width = "0";
+    $("opt"+k+"p").textContent = "";
+  }
+  $("qnum").textContent = "Вопрос " + (answeredCount()+1);
+  const em = $("qemoji"); em.textContent = current.e; em.classList.remove("bounce"); void em.offsetWidth; em.classList.add("bounce");
+  $("optAt").textContent = current.a;
+  $("optBt").textContent = current.b;
+  $("hint").textContent = answeredCount() < 2 ? "Клавиши 1 и 2 тоже работают" : "";
+  show("play");
+}
+
+function split(qid){
+  let a=0,b=0;
+  for(const o of others){ const v = o.a?.[qid]; if(v===0) a++; else if(v===1) b++; }
+  return {a,b,t:a+b};
+}
+
+function choose(i){
+  if(!current || locked) return;
+  locked = true;
+  mine[current.id] = i;
+  store.set("sq-answers", mine);
+  flush();
+  updateHud();
+  const s = split(current.id);
+  const t = s.t + 1, pa = Math.round(100*(s.a + (i===0))/t), pb = 100 - pa;
+  $("choices").classList.add("answered");
+  $(i===0 ? "optA" : "optB").classList.add("picked");
+  $("optA").querySelector(".fill").style.width = pa + "%";
+  $("optB").querySelector(".fill").style.width = pb + "%";
+  $("optAp").textContent = pa + "%";
+  $("optBp").textContent = pb + "%";
+  const same = i===0 ? s.a : s.b;
+  $("hint").textContent = s.t === 0 ? "Ты первый, кто ответил на этот вопрос!" :
+    same === 0 ? "Так не ответил никто. Ты уникум." :
+    Math.round(100*same/s.t) + "% людей выбрали так же";
+  setTimeout(() => {
+    if(answeredCount() === PORTRAIT_AT){ renderPortrait(); show("portrait"); }
+    else next();
+  }, 1400);
+}
+
+// --- общая база: публичный MQTT-брокер. Ответы каждого лежат retained-сообщением в TOPIC/a/<id>,
+// поэтому новый посетитель сразу получает ответы всех остальных. Пишем в два брокера на случай, если один упадёт ---
+const TOPIC = "strange-questions/v1";
+const BROKERS = ["wss://broker.emqx.io:8084/mqtt", "wss://broker.hivemq.com:8884/mqtt"];
+const nets = [];
+const people = new Map();   // id -> {a, n, t}
+let flushTimer = null, othersTimer = null;
+function flush(){
+  clearTimeout(flushTimer);
+  flushTimer = setTimeout(() => {
+    const msg = JSON.stringify({a: mine, n: Object.keys(mine).length, t: Date.now()});
+    for(const c of nets) if(c.connected) try{ c.publish(TOPIC + "/a/" + uid, msg, {qos: 1, retain: true}); }catch(e){}
+  }, 700);
+}
+// чужие данные не доверяем: оставляем только ответы 0/1 на вопросы с нормальными id
+function clean(raw){
+  let v; try{ v = JSON.parse(raw); }catch(e){ return null; }
+  if(!v || typeof v.a !== "object" || Array.isArray(v.a)) return null;
+  const a = {}; let k = 0;
+  for(const id in v.a){ if(k >= 2000) break; if(/^[a-z0-9]{1,12}$/.test(id) && (v.a[id] === 0 || v.a[id] === 1)){ a[id] = v.a[id]; k++; } }
+  return k ? {a, n: k, t: Number(v.t) || 0} : null;
+}
+function scheduleOthers(){
+  clearTimeout(othersTimer);
+  othersTimer = setTimeout(() => {
+    others = [...people.values()];
+    dbReady = true; updateStartStat();
+    if(!$("portrait").hidden) renderPortrait();
+  }, 300);
+}
+
+function axisScores(ans){
+  const sum = {}, cnt = {};
+  for(const k in AX){ sum[k]=0; cnt[k]=0; }
+  for(const id in ans){
+    const q = qmap.get(id); if(!q || !(q.ax in AX)) continue;
+    sum[q.ax] += ans[id]===0 ? 1 : -1; cnt[q.ax]++;
+  }
+  const out = {}; for(const k in AX) out[k] = cnt[k] ? sum[k]/cnt[k] : 0;
+  return {s:out, c:cnt};
+}
+
+function renderPortrait(){
+  const me = axisScores(mine);
+  const ranked = Object.keys(AX).filter(k => me.c[k]).sort((x,y) => Math.abs(me.s[y]) - Math.abs(me.s[x]));
+  const key = k => k + (me.s[k] >= 0 ? "+" : "-");
+  const main = ranked[0] ? key(ranked[0]) : "chaos+";
+  const t = TYPES[main];
+  $("pEmoji").textContent = t[0];
+  $("pName").textContent = t[1];
+  $("pDesc").textContent = t[2] + (ranked[1] && me.s[ranked[1]] !== 0 ? " С щепоткой " + PINCH[key(ranked[1])] + "." : "");
+
+  // средние по другим людям
+  const avg = {}, ac = {};
+  for(const k in AX){ avg[k]=0; ac[k]=0; }
+  for(const o of others){ if(!o.a) continue; const sc = axisScores(o.a); for(const k in AX) if(sc.c[k]){ avg[k]+=sc.s[k]; ac[k]++; } }
+
+  const box = $("axes"); box.textContent = "";
+  for(const k in AX){
+    const v = me.s[k], pos = 50 + v*46;
+    const el = document.createElement("div"); el.className = "axis";
+    const lbl = document.createElement("div"); lbl.className = "lbl";
+    const l = document.createElement("span"); l.textContent = AX[k].n; if(v < 0) l.className = "on";
+    const r = document.createElement("span"); r.textContent = AX[k].p; if(v > 0) r.className = "on";
+    lbl.append(l, r);
+    const tr = document.createElement("div"); tr.className = "track";
+    const mid = document.createElement("i"); mid.className = "mid"; tr.append(mid);
+    if(ac[k]){ const a = document.createElement("i"); a.className = "avg"; a.style.left = (50 + (avg[k]/ac[k])*46) + "%"; tr.append(a); }
+    const d = document.createElement("i"); d.className = "me"; d.style.left = pos + "%"; tr.append(d);
+    el.append(lbl, tr); box.append(el);
+  }
+
+  // барометр: в среднем какая доля людей ответила так же, как ты
+  let total = 0, n = 0, rare = null;
+  for(const id in mine){
+    if(!qmap.has(id)) continue;
+    const s = split(id); if(!s.t) continue;
+    const share = (mine[id]===0 ? s.a : s.b) / s.t;
+    total += share; n++;
+    if(!rare || share < rare.share) rare = {id, share};
+  }
+  if(n){
+    const pct = Math.round(100*total/n);
+    $("gNum").textContent = pct + "%";
+    $("gArc").setAttribute("stroke-dasharray", pct + " 100");
+    $("gNeedle").style.transform = "rotate(" + (-90 + pct*1.8) + "deg)";
+    $("gCap").textContent = pct < 40 ? "Уникум" : pct < 55 ? "Свой путь" : pct < 70 ? "В потоке" : "Голос народа";
+    $("gSub").innerHTML = "";
+    $("gSub").append("Совпадение с остальными по ", Object.assign(document.createElement("b"),{textContent:n}), " вопросам");
+    if(rare && rare.share < .5){
+      const q = qmap.get(rare.id);
+      $("rare").hidden = false;
+      $("rare").innerHTML = "";
+      $("rare").append(q.e + " Самый редкий ответ: ", Object.assign(document.createElement("b"),{textContent:"«" + (mine[rare.id]===0 ? q.a : q.b) + "»"}), rare.share === 0 ? ". Больше так не ответил никто." : ". Так ответили всего " + Math.round(rare.share*100) + "%.");
+    } else $("rare").hidden = true;
+  } else {
+    $("gNum").textContent = "—";
+    $("gArc").setAttribute("stroke-dasharray", "0 100");
+    $("gNeedle").style.transform = "rotate(-90deg)";
+    $("gCap").textContent = dbReady ? "Пока не с кем сравнить" : "Ждём ответы других";
+    $("gSub").textContent = "Барометр оживёт, когда ответят другие люди";
+    $("rare").hidden = true;
+  }
+
+  // выносливость
+  const myN = answeredCount();
+  const ns = others.map(o => o.n || 0).filter(x => x > 0);
+  const st = $("stamina"); st.innerHTML = "";
+  st.append("Ты осилил ", Object.assign(document.createElement("b"),{textContent:myN}), " из " + qmap.size + " вопросов.");
+  if(ns.length){
+    const beat = Math.round(100 * ns.filter(x => x < myN).length / ns.length);
+    const mean = Math.round(ns.reduce((a,b)=>a+b,0)/ns.length);
+    if(beat > 0) st.append(" Это больше, чем у ", Object.assign(document.createElement("b"),{textContent:beat + "%"}), " участников.");
+    st.append(" В среднем осиливают " + mean + ".");
+  }
+  updateSaveNote();
+}
+
+function updateSaveNote(){
+  $("saveNote").textContent = canWrite ? "Твои ответы анонимно учитываются в общей статистике." :
+    "Нет связи с сервером, поэтому ответы пока сохраняются только на этом устройстве.";
+}
+
+function updateStartStat(){
+  const people = others.filter(o => (o.n||0) > 0).length;
+  $("startStat").textContent = !dbReady ? "Вопросов: " + qmap.size :
+    "Вопросов: " + qmap.size + " · Уже ответили: " + people + " " + plural(people, "человек","человека","человек");
+}
+function plural(n,a,b,c){ const m10=n%10, m100=n%100; return m10===1&&m100!==11?a : m10>=2&&m10<=4&&(m100<10||m100>=20)?b : c; }
+
+function connect(){
+  if(!window.mqtt){ updateStartStat(); updateSaveNote(); return; }
+  for(const url of BROKERS){
+    let c;
+    try{ c = mqtt.connect(url, {clientId: "sq" + Math.random().toString(36).slice(2, 12), clean: true, connectTimeout: 8000, reconnectPeriod: 4000, keepalive: 30}); }
+    catch(e){ continue; }
+    nets.push(c);
+    c.on("connect", () => {
+      canWrite = true; updateSaveNote();
+      c.subscribe(TOPIC + "/a/+", {qos: 0});
+      if(Object.keys(mine).length) flush();
+      setTimeout(() => { dbReady = true; updateStartStat(); }, 2000);
+    });
+    c.on("close", () => { canWrite = nets.some(n => n.connected); updateSaveNote(); });
+    c.on("message", (topic, payload) => {
+      const id = topic.slice(TOPIC.length + 3);
+      if(id === uid || !/^[a-z0-9]{10,24}$/.test(id)) return;
+      const v = clean(payload.toString());
+      if(!v) return;
+      const old = people.get(id);
+      if(old && old.t >= v.t) return;
+      people.set(id, v); scheduleOthers();
+    });
+    c.on("error", () => {});
+  }
+}
+
+// новые вопросы добавляются в questions.json без правки страницы
+function loadQuestions(){
+  fetch("questions.json", {cache: "no-cache"}).then(r => r.ok ? r.json() : []).then(list => {
+    if(!Array.isArray(list)) return;
+    for(const v of list){
+      if(v && typeof v.id === "string" && /^[a-z0-9]{1,12}$/.test(v.id) && v.a && v.b && v.ax in AX && !qmap.has(v.id))
+        qmap.set(v.id, {id: v.id, ax: v.ax, e: v.e || "❓", a: String(v.a), b: String(v.b)});
+    }
+    updateHud(); updateStartStat();
+    if(!$("done").hidden){ refreshDeck(); if(deck.length) next(); }
+  }).catch(() => {});
+}
+
+$("begin").onclick = next;
+$("optA").onclick = () => choose(0);
+$("optB").onclick = () => choose(1);
+$("more").onclick = next;
+$("toPortrait").onclick = () => { renderPortrait(); show("portrait"); };
+$("doneToPortrait").onclick = () => { renderPortrait(); show("portrait"); };
+$("home").onclick = () => { updateStartStat(); show("start"); };
+document.addEventListener("keydown", e => {
+  if($("play").hidden) return;
+  if(e.key === "1" || e.key === "ArrowLeft" || e.key === "ArrowUp") choose(0);
+  if(e.key === "2" || e.key === "ArrowRight" || e.key === "ArrowDown") choose(1);
+});
+
+updateHud(); updateStartStat();
+if(answeredCount() > 0) $("begin").textContent = "Продолжить";
+connect();
+loadQuestions();
+</script>
+</body>
+</html>
